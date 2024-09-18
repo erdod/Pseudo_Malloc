@@ -8,14 +8,14 @@
 
 typedef struct bitmap
 {
-    void* buffer;
+    char* buffer;
     int buffer_size;
     int num_bit;
 }bitmap;
 
 int get_bytes(int num_bit);
 
-void bitmap_init(bitmap* bitmap,void* buffer, int numbit);
+void bitmap_init(bitmap* bitmap,char* buffer, int numbit);
 
 void set_bit(bitmap* bitmap, int bit, int status);
 
