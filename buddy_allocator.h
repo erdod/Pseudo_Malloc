@@ -1,10 +1,10 @@
 #include "bitmap.h"
 
 typedef struct {
-    int num_levels;         
-    bitmap bitmap;          
-    int min_bucket_size;    
-    int total_memory_size;  
+  bitmap bit_map;
+  uint8_t* mem;
+  int num_levels;
+  int min_bucket_size;
 } BuddyAllocator;
 
 void BuddyAllocator_init(BuddyAllocator* buddyallocator, int total_memory_size, int min_bucket_size);
