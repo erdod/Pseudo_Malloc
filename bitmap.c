@@ -7,7 +7,7 @@ int get_bytes(int num_bit){
     return num_bit/8 + (((num_bit%8)!=0) ? 1 : 0);
 }
 
-void bitmap_init(bitmap* bitmap, char* buffer,int num_bit){
+void bitmap_init(bitmap* bitmap, uint8_t* buffer,int num_bit){
     bitmap->buffer=buffer;
     bitmap->num_bit= num_bit;
     bitmap->buffer_size= get_bytes(num_bit);

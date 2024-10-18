@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 #ifndef STATUS_H
 #define STATUS_H
 
@@ -8,14 +10,14 @@
 
 typedef struct bitmap
 {
-    char* buffer;
+    uint8_t *buffer;
     int buffer_size;
     int num_bit;
 }bitmap;
 
 int get_bytes(int num_bit);
 
-void bitmap_init(bitmap* bitmap,char* buffer, int numbit);
+void bitmap_init(bitmap* bitmap,uint8_t  *buffer, int numbit);
 
 void set_bit(bitmap* bitmap, int bit, int status);
 
