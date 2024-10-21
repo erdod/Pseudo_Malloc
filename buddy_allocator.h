@@ -1,11 +1,8 @@
 #include <stdint.h>
 #include "bitmap.h"
+#include "list_item.h"
 
-
-typedef struct ListItem {
-    struct ListItem* prev;
-    struct ListItem* next; 
-} ListItem;
+#define MAX_LEVELS 100
 
 typedef struct BuddyListItem {
     ListItem list;  
@@ -22,6 +19,8 @@ typedef struct {
     uint8_t* mem;           
     int num_levels;         
     int min_bucket_size;    
+    ListHead free[MAX_LEVELS];   
+    ListHead occupied[MAX_LEVELS];
 } BuddyAllocator;
 
 void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char *mem, int num_levels, int min);
