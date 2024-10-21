@@ -44,4 +44,41 @@ void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char 
     }
 }
 
+void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size) {
+    int level = (int)ceil(log2((size + 8) / alloc->min_bucket_size));
+    
+    if (level > alloc->num_levels) {
+        level = alloc->num_levels; 
+    }
+
+    BuddyListItem* buddy = BuddyAllocator_getBuddy(alloc, level);
+    if (!buddy) {
+        return NULL; 
+    }
+
+    BuddyListItem** target = (BuddyListItem**)(buddy->start);
+    *target = buddy;
+    return buddy->start + 8;  
+}
+
+void BuddyAllocator_free(BuddyAllocator* alloc, void* mem) {
+    printf("freeing %p\n", mem);
+    // Recupera il buddy dal sistema
+    char* p = (char*)mem;
+    p -= 8;  // Torna indietro per trovare il puntatore del buddy
+    BuddyListItem** buddy_ptr = (BuddyListItem**)p;
+    BuddyListItem* buddy = *buddy_ptr;
+
+    // Controllo di integrità
+    assert(buddy->start == p);
+
+    // Libera il buddy
+    BuddyAllocator_releaseBuddy(alloc, buddy);
+}
+
+
+
+
+
+
 
