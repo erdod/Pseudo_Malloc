@@ -31,3 +31,6 @@ void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, BuddyListItem* item);
 int get_level(int index);
 int get_parent(int index);
 int get_buddy(int index);
+BuddyListItem* BuddyAllocator_createListItem(BuddyAllocator* alloc, int idx, BuddyListItem* parent);
+void BuddyAllocator_destroyListItem(BuddyAllocator* alloc, BuddyListItem* item);
+

@@ -1,3 +1,6 @@
+#ifndef BITMAP_H  
+#define BITMAP_H
+
 #include <stdint.h>
 
 #ifndef STATUS_H
@@ -23,6 +26,6 @@ void set_bit(bitmap* bitmap, int bit, int status);
 
 int get_status(bitmap* bitmap, int bit);
 
-
+#endif 
 
 
