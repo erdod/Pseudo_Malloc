@@ -1,3 +1,6 @@
+#ifndef BUDDY_ALLOCATOR_H
+#define BUDDY_ALLOCATOR_H
+
 #include <stdint.h>
 #include "bitmap.h"
 #include "list_item.h"
@@ -33,3 +36,4 @@ int get_buddy(int index);
 BuddyListItem* BuddyAllocator_createListItem(BuddyAllocator* alloc, int idx, BuddyListItem* parent);
 void BuddyAllocator_destroyListItem(BuddyAllocator* alloc, BuddyListItem* item);
 
+#endif // BUDDY_ALLOCATOR_H
