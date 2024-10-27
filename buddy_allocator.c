@@ -60,39 +60,40 @@ void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char 
 }
 
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size) {
-    int level = alloc->num_levels ;
-	int bucket_size = alloc->min_bucket_size;
-	while (bucket_size < size)
-	{
-		bucket_size <<= 1;
-		level--;
-	}
+    int level = alloc->num_levels;
+    int bucket_size = alloc->min_bucket_size;
+    
+    // Calcolo del livello appropriato per la dimensione richiesta
+    while (bucket_size < size) {
+        bucket_size <<= 1;
+        level--;
+    }
+    
     if (level > alloc->num_levels) {
         printf("Requested size exceeds maximum level\n");
-        return NULL; 
+        return NULL;
     }
+
     printf("Requested size: %d, Calculated level: %d\n", size, level);
+
+    // Ottiene un buddy dal livello calcolato
     BuddyListItem* buddy = BuddyAllocator_getBuddy(alloc, level);
     if (!buddy) {
         printf("No buddy available at level %d\n", level);
-        return NULL; 
+        return NULL;
     }
-    int buddy_index = buddy->idx ;
+
+    int buddy_index = buddy->idx;
     set_bit(&alloc->bit_map, buddy_index, STATUS_ON);
     printf("Bit for buddy index %d set to STATUS_ON.\n", buddy_index);
-    char* allocated_memory = buddy->start + 8;  
-    int allocated_size = buddy->size - 8; 
-    if (allocated_size > size + 8) {
-        int new_idx = buddy_index  + 1; 
-        BuddyListItem* new_buddy = BuddyAllocator_createListItem(alloc, new_idx, buddy);
-        if (new_buddy) {
-            List_push_item(&alloc->free[level], (ListItem*)new_buddy);
-            printf("New buddy created at index %d and added to free list.\n", new_idx);
-        }
-    }
+
+    // Punta alla memoria da allocare e ignora i primi 8 byte (metadati)
+    char* allocated_memory = buddy->start + 8;
+
     printf("Buddy allocated at: %p\n", allocated_memory);
-    return allocated_memory;  
+    return allocated_memory;
 }
+
 
 void BuddyAllocator_free(BuddyAllocator* alloc, int index) {
     if (index < 0 || index >= alloc->bit_map.num_bit) {
