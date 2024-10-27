@@ -58,11 +58,11 @@ int main(int argc, char** argv) {
     }
     printf("\n");
     printf("Deallocazione del blocco p1...\n");
-    BuddyAllocator_free(&alloc, p1);
+    BuddyAllocator_free(&alloc, 1);
     printf("Deallocazione del blocco p2...\n");
-    BuddyAllocator_free(&alloc, p2);
+    BuddyAllocator_free(&alloc, 11);
     printf("Deallocazione del blocco p3...\n");
-    BuddyAllocator_free(&alloc, p3);
+    BuddyAllocator_free(&alloc, 6);
     printf("Bitmap finale:\n");
     for (int i = 0; i < alloc.bit_map.num_bit; i++) {
         printf("%d", get_status(&alloc.bit_map, i));

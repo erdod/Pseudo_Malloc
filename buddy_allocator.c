@@ -94,32 +94,37 @@ void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size) {
     return allocated_memory;  
 }
 
-void BuddyAllocator_free(BuddyAllocator* alloc, void* mem) {
-    char* p = (char*)mem;
-    p -= 8;  
-    BuddyListItem** buddy_ptr = (BuddyListItem**)p;
-    BuddyListItem* buddy = *buddy_ptr;
-    BuddyAllocator_releaseBuddy(alloc, buddy);
-    int buddy_index = buddy->idx;
-    set_bit(&alloc->bit_map, buddy_index, STATUS_OFF);
+void BuddyAllocator_free(BuddyAllocator* alloc, int index) {
+    if (index < 0 || index >= alloc->bit_map.num_bit) {
+        printf("Errore: Indice non valido per la deallocazione: %d\n", index);
+        return;
+    }
+    set_bit(&alloc->bit_map, index, STATUS_OFF);
+    printf("Bit per l'indice %d impostato su STATUS_OFF.\n", index);
+    int current_index = index;
+    int current_level = get_level(index);  
+    while (current_level < alloc->num_levels - 1) {
+        int buddy_index = get_buddy(current_index); 
+        if (get_status(&alloc->bit_map, buddy_index) == STATUS_ON) {
+            break; 
+        }
+        ListItem* removed_item = List_remove_item(&alloc->free[current_level]);
+        if (removed_item) {
+            printf("Rimosso buddy libero a indice %d dalla lista di livello %d.\n", buddy_index, current_level);
+            free(removed_item);  
+        } else {
+            printf("Nessun buddy libero trovato a livello %d per l'indice %d.\n", current_level, buddy_index);
+        }
+        current_index = get_parent(current_index);
+        current_level++;
+    }
+    BuddyListItem* merged_buddy = BuddyAllocator_createListItem(alloc, current_index, NULL);
+    List_push_item(&alloc->free[current_level], (ListItem*)merged_buddy);
+    printf("Blocco unito aggiunto alla lista di blocchi liberi a livello %d con indice %d.\n", current_level, current_index);
 }
 
-void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, BuddyListItem* item) {
-    BuddyListItem* parent_ptr = item->parent_ptr;
-    BuddyListItem* buddy_ptr = item->buddy_ptr;
-    List_push_item(&alloc->free[item->level], (ListItem*)item);
-    printf("Block at index %d added to free list at level %d.\n", item->idx, item->level);
-    if (buddy_ptr && buddy_ptr->list.prev == NULL && buddy_ptr->list.next == NULL) {
-        printf("Merging blocks at level %d\n", item->level);
-        int item_index = item->idx;
-        set_bit(&alloc->bit_map, item_index, STATUS_OFF);
-        int buddy_index = buddy_ptr->idx;
-        set_bit(&alloc->bit_map, buddy_index, STATUS_OFF);
-        BuddyAllocator_destroyListItem(alloc, item);       
-        BuddyAllocator_destroyListItem(alloc, buddy_ptr);  
-        BuddyAllocator_releaseBuddy(alloc, parent_ptr);
-    }
-}
+
+
 
 
 BuddyListItem* BuddyAllocator_createListItem(BuddyAllocator* alloc, int idx, BuddyListItem* parent) {
@@ -145,8 +150,6 @@ BuddyListItem* BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level) {
         printf("Requested level %d is negative\n", level);
         return NULL;  
     }
-
-    // Controlla se ci sono elementi disponibili nel livello richiesto
     if (!List_isEmpty(&alloc->free[level])) {
         printf("Found buddy at level %d", level);
         BuddyListItem* item = (BuddyListItem*)List_remove_item(&alloc->free[level]);
@@ -154,31 +157,21 @@ BuddyListItem* BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level) {
         printf("Retrieved buddy at address: %p\n", (void*)item->start);
         return item;
     }
-
-    // Se non ci sono buddy nel livello attuale, cerca nel livello superiore
     printf("No buddy available at level %d, checking level %d.\n", level, level - 1);
     BuddyListItem* parent_ptr = BuddyAllocator_getBuddy(alloc, level - 1);
     if (!parent_ptr) {
         printf("No buddy found at level %d.\n", level - 1);
         return NULL; 
     }
-
-    // Calcola gli indici dei buddy
     int left_idx = parent_ptr->idx * 2 + 1; 
     int right_idx = parent_ptr->idx * 2 + 2;
-
     printf("Creating left and right buddies for parent at index %d.\n", parent_ptr->idx);
     BuddyListItem* left_ptr = BuddyAllocator_createListItem(alloc, left_idx, parent_ptr);
     BuddyListItem* right_ptr = BuddyAllocator_createListItem(alloc, right_idx, parent_ptr);
-
     left_ptr->buddy_ptr = right_ptr;
     right_ptr->buddy_ptr = left_ptr;
-
-    // Aggiunge il buddy destro alla lista di free
     List_push_item(&alloc->free[level], (ListItem*)right_ptr);
     printf("Pushed buddy at address: %p to level %d.\n", (void*)right_ptr->start, level);
-
-    // Restituisce il pointer al buddy sinistro
     printf("Returning left buddy at address: %p.\n", (void*)left_ptr->start);
     return left_ptr;
 }

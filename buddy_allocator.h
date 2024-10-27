@@ -25,9 +25,8 @@ typedef struct {
 
 void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char *mem, uint8_t *buffer, int num_levels, int min);
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size);
-void BuddyAllocator_free(BuddyAllocator* alloc, void* mem);
+void BuddyAllocator_free(BuddyAllocator* alloc, int index);
 BuddyListItem* BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level);
-void BuddyAllocator_releaseBuddy(BuddyAllocator* alloc, BuddyListItem* item);
 int get_level(int index);
 int get_parent(int index);
 int get_buddy(int index);
