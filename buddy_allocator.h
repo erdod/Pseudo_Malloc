@@ -23,7 +23,7 @@ typedef struct {
     ListHead occupied[MAX_LEVELS];
 } BuddyAllocator;
 
-void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char *mem, int num_levels, int min);
+void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char *mem, uint8_t *buffer, int num_levels, int min);
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size);
 void BuddyAllocator_free(BuddyAllocator* alloc, void* mem);
 BuddyListItem* BuddyAllocator_getBuddy(BuddyAllocator* alloc, int level);

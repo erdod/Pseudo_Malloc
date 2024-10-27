@@ -9,7 +9,7 @@
 #define STATUS_ON  1
 #define STATUS_OFF 0
 
-#endif // STATUS_H
+#endif 
 
 typedef struct bitmap
 {

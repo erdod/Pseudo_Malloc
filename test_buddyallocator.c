@@ -30,8 +30,7 @@ int main() {
         printf("%d", get_status(&buddy_allocator.bit_map, i));
     }
     printf("\n");
-
-    BuddyAllocator_free(&buddy_allocator, b2);
+ 
     BuddyAllocator_free(&buddy_allocator, b1);
 
     printf("Bitmap dopo le liberazioni:\n");

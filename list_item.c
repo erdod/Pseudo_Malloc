@@ -24,7 +24,6 @@ ListItem* List_remove_item(ListHead* list) {
     if (list->head == NULL) {
         return NULL; 
     }
-
     ListItem* item = list->head;
     list->head = item->next;
     if (list->head) {
@@ -34,6 +33,20 @@ ListItem* List_remove_item(ListHead* list) {
     }
     list->size--;
     return item;
+}
+
+void List_print(ListHead* list) {
+    if (List_isEmpty(list)) {
+        printf("La lista è vuota.\n");
+        return;
+    }
+    ListItem* current = list->head; 
+    printf("Lista: ");
+    while (current != NULL) {   
+        printf("%p ", (void*)current);
+        current = current->next;     
+    }
+    printf("\n");
 }
 
 int List_isEmpty(ListHead* list) {
