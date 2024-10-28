@@ -4,7 +4,7 @@
 #include "buddy_allocator.h"
 #include <stddef.h>
 
-void* pseudo_malloc(BuddyAllocator* alloc, size_t size);
-void pseudo_free(BuddyAllocator* alloc, void* ptr, size_t size);
+void* pseudo_malloc(BuddyAllocator* alloc, size_t size, const char* resource_name);
+void pseudo_free(BuddyAllocator* alloc, void* ptr, size_t size, const char* resource_name);
 
-#endif // PSEUDO_MALLOC_H
+#endif 
