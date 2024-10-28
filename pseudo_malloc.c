@@ -36,6 +36,7 @@ void* pseudo_malloc(BuddyAllocator* alloc, size_t size) {
 
 void pseudo_free(BuddyAllocator* alloc, void* ptr, size_t size) {
     size_t threshold = PAGE_SIZE / 4;
+
     if (size >= threshold) {
         if (munmap(ptr, size) == 0) {
             printf("Blocco grande deallocato con successo tramite munmap: %p\n", ptr);
@@ -44,7 +45,9 @@ void pseudo_free(BuddyAllocator* alloc, void* ptr, size_t size) {
         }
     } else {
         printf("Deallocazione di un blocco tramite BuddyAllocator: %p\n", ptr);
-        int buddy_index = ((char*)ptr - (char*)alloc->mem - 8) / alloc->min_bucket_size;
+        BuddyListItem* buddy = *(BuddyListItem**)((char*)ptr -8);
+        int buddy_index = buddy->idx;
+        printf("L'indice per il buddy calcolato è: %d\n", buddy_index);
         BuddyAllocator_free(alloc, buddy_index);
     }
 }

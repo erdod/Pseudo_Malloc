@@ -62,37 +62,27 @@ void buddy_allocator_init(BuddyAllocator *buddy_allocator, bitmap *bitmap, char 
 void* BuddyAllocator_malloc(BuddyAllocator* alloc, int size) {
     int level = alloc->num_levels;
     int bucket_size = alloc->min_bucket_size;
-    
-    // Calcolo del livello appropriato per la dimensione richiesta
     while (bucket_size < size) {
         bucket_size <<= 1;
         level--;
     }
-    
-    if (level > alloc->num_levels) {
+    if (level >= alloc->num_levels) {
         printf("Requested size exceeds maximum level\n");
         return NULL;
     }
-
     printf("Requested size: %d, Calculated level: %d\n", size, level);
-
-    // Ottiene un buddy dal livello calcolato
     BuddyListItem* buddy = BuddyAllocator_getBuddy(alloc, level);
     if (!buddy) {
         printf("No buddy available at level %d\n", level);
         return NULL;
     }
-
-    int buddy_index = buddy->idx;
-    set_bit(&alloc->bit_map, buddy_index, STATUS_ON);
-    printf("Bit for buddy index %d set to STATUS_ON.\n", buddy_index);
-
-    // Punta alla memoria da allocare e ignora i primi 8 byte (metadati)
-    char* allocated_memory = buddy->start + 8;
-
-    printf("Buddy allocated at: %p\n", allocated_memory);
-    return allocated_memory;
+    set_bit(&alloc->bit_map, buddy->idx, STATUS_ON);
+    printf("Bit for buddy index %d set to STATUS_ON.\n", buddy->idx);
+    BuddyListItem** target = (BuddyListItem**)(buddy->start);
+    *target = buddy;  
+    return buddy->start + 8;
 }
+
 
 
 void BuddyAllocator_free(BuddyAllocator* alloc, int index) {
@@ -103,8 +93,9 @@ void BuddyAllocator_free(BuddyAllocator* alloc, int index) {
     set_bit(&alloc->bit_map, index, STATUS_OFF);
     printf("Bit per l'indice %d impostato su STATUS_OFF.\n", index);
     int current_index = index;
-    int current_level = get_level(index);  
-    while (current_level < alloc->num_levels - 1) {
+    int current_level = get_level(index);
+    printf("livello del buddy da deallocare dato da get_levels() è: %d\n",current_level);  
+    while (current_level < alloc->num_levels -1) {
         int buddy_index = get_buddy(current_index); 
         if (get_status(&alloc->bit_map, buddy_index) == STATUS_ON) {
             break; 
